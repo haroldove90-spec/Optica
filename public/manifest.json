@@ -1,9 +1,9 @@
 {
-  "name": "Optimax - Asistencia & Protección Vial",
+  "name": "Optimax - Gestión Óptica",
   "short_name": "Optimax",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#f8fafc",
   "theme_color": "#004b93",
   "icons": [
     {
