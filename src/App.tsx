@@ -83,16 +83,16 @@ const PATIENTS: Patient[] = [
 ];
 
 const PRODUCTS: Product[] = [
-  { id: 1, name: 'Ray-Ban Classic Aviator', category: 'Sol', price: 3450, stock: 12, image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&q=80&w=600' },
-  { id: 2, name: 'Oakley Holbrook Prizm', category: 'Sol', price: 2900, stock: 8, image: 'https://images.unsplash.com/photo-1511499767390-a7335958beba?auto=format&fit=crop&q=80&w=600' },
-  { id: 3, name: 'Armazón Giorgio Armani Titanium', category: 'Armazones', price: 5800, stock: 5, image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&q=80&w=600' },
-  { id: 4, name: 'Lentes de Contacto Acuvue Moist', category: 'Lentes de Contacto', price: 950, stock: 45, image: 'https://images.unsplash.com/photo-1591076482161-42ce6da69f67?auto=format&fit=crop&q=80&w=600' },
-  { id: 5, name: 'Prada Cinema Eyewear', category: 'Sol', price: 4200, stock: 3, image: 'https://images.unsplash.com/photo-1625591339762-430a30b3564c?auto=format&fit=crop&q=80&w=600' },
-  { id: 6, name: 'Armazón Minimalista Silhoutte', category: 'Armazones', price: 6100, stock: 7, image: 'https://images.unsplash.com/photo-1511499767390-a7335958beba?auto=format&fit=crop&q=80&w=600' },
+  { id: 1, name: 'Ray-Ban Classic Aviator', category: 'Sol', price: 3450, stock: 12, image: 'https://lux.mx/cdn/shop/files/Lente-Oftalmico-Ray-Ban-RB7047O-Negro-8053672357936_1.webp?v=1725032081' },
+  { id: 2, name: 'Ray-Ban Wayfarer Azure', category: 'Armazones', price: 2900, stock: 8, image: 'https://lensmexico.mx/cdn/shop/files/db902109-4245-4722-a602-47fae05ffbdf-p-rx70475196-3-bce8371c-2aa6-4285-b89f-bb78935997e2.jpg?v=1743176237&width=1200' },
+  { id: 3, name: 'Armazón Giorgio Titanium', category: 'Armazones', price: 5800, stock: 5, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJf61wdy1r54NC_7BW52OUcTqmtPwhJSiUQw&s' },
+  { id: 4, name: 'Prada Cinema Eyewear', category: 'Sol', price: 4200, stock: 45, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThVuN6UNhQTxx9JEKUyJYKMzwhJZvE12dVIA&s' },
+  { id: 5, name: 'Armazón Minimalista Silhouette', category: 'Armazones', price: 6100, stock: 3, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZ6d2fdgbuoi0-BJC0blnS2HZRFy4NF15Ciw&s' },
+  { id: 6, name: 'Acuvue Moist Contact Lenses', category: 'Lentes de Contacto', price: 950, stock: 7, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1DMFI-4zwKG1iguEgLOaFCQo-uPQYpOqwdQ&s' },
 ];
 
 // --- Theme Config ---
-const PRIMARY_COLOR = '#004b93'; // Optimax Blue
+const PRIMARY_COLOR = '#00A4AE'; // Optimax Teal
 const ACCENT_COLOR = '#DA6000';  // Corporate Orange
 
 // --- Hook for screen size ---
@@ -116,12 +116,12 @@ const Sidebar = ({ currentView, setView, isOpen, setIsOpen, role }: {
   
   if (role === 'Cliente') return null;
 
-  const menuItems = [
-    { id: 'Dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['Administrador', 'Optometrista'] as UserRole[] },
-    { id: 'Expedientes', label: 'Expediente Clínico', icon: ClipboardList, roles: ['Administrador', 'Optometrista'] as UserRole[] },
-    { id: 'Inventario', label: 'Inventario', icon: Boxes, roles: ['Administrador'] as UserRole[] },
-    { id: 'Tienda', label: 'Tienda eCommerce', icon: ShoppingBag, roles: ['Administrador'] as UserRole[] },
-    { id: 'Configuracion', label: 'Configuración', icon: Settings, roles: ['Administrador'] as UserRole[] },
+  const menuItems: { id: View, label: string, icon: any, roles: UserRole[] }[] = [
+    { id: 'Dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['Administrador', 'Optometrista'] },
+    { id: 'Expedientes', label: 'Expediente Clínico', icon: ClipboardList, roles: ['Administrador', 'Optometrista'] },
+    { id: 'Inventario', label: 'Inventario', icon: Boxes, roles: ['Administrador'] },
+    { id: 'Tienda', label: 'Tienda eCommerce', icon: ShoppingBag, roles: ['Administrador'] },
+    { id: 'Configuracion', label: 'Configuración', icon: Settings, roles: ['Administrador'] },
   ];
 
   const filteredItems = menuItems.filter(item => (item.roles as string[]).includes(role));
@@ -144,7 +144,7 @@ const Sidebar = ({ currentView, setView, isOpen, setIsOpen, role }: {
         initial={false}
         animate={{ x: isMobile ? (isOpen ? 0 : -280) : 0 }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="fixed lg:relative z-50 h-screen w-[280px] bg-[#004b93] text-white flex flex-col shadow-2xl lg:translate-x-0"
+        className="fixed lg:relative z-50 h-screen w-[280px] bg-[#00A4AE] text-white flex flex-col shadow-2xl lg:translate-x-0"
       >
         <div className="p-8 flex-1">
           <div className="flex items-center justify-between mb-12">
@@ -166,7 +166,7 @@ const Sidebar = ({ currentView, setView, isOpen, setIsOpen, role }: {
                 }}
                 className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all group ${
                   currentView === item.id 
-                    ? 'bg-white text-[#004b93] shadow-lg font-bold' 
+                    ? 'bg-white text-[#00A4AE] shadow-lg font-bold' 
                     : 'text-white/60 hover:bg-white/5 hover:text-white'
                 }`}
               >
@@ -253,7 +253,7 @@ export default function App() {
                 <p className="text-slate-500 font-medium mt-1">Tu óptica está funcionando correctamente hoy.</p>
               </div>
               {role === 'Administrador' && (
-                <button className="flex items-center gap-2 bg-[#004b93] text-white px-8 py-4 rounded-[20px] font-bold shadow-xl hover:shadow-2xl transition-all">
+                <button className="flex items-center gap-2 bg-[#DA6000] text-white px-8 py-4 rounded-[20px] font-bold shadow-xl hover:translate-y-[-2px] transition-all">
                   <Plus className="w-5 h-5" /> Nueva Venta
                 </button>
               )}
@@ -287,7 +287,7 @@ export default function App() {
                     ].map((app, i) => (
                       <div key={i} className="flex items-center justify-between p-5 bg-slate-50 rounded-3xl border border-slate-100">
                         <div className="flex items-center gap-5">
-                          <div className="bg-white w-12 h-12 rounded-xl flex items-center justify-center font-black text-[#004b93] border border-slate-200">{app.time}</div>
+                          <div className="bg-white w-12 h-12 rounded-xl flex items-center justify-center font-black text-[#00A4AE] border border-slate-200">{app.time}</div>
                           <div>
                             <p className="font-black text-slate-900">{app.patient}</p>
                             <p className="text-xs text-slate-400 font-bold uppercase">{app.service}</p>
@@ -299,14 +299,14 @@ export default function App() {
                   </div>
                 </Card>
               </div>
-              <Card className="bg-[#004b93] text-white">
+              <Card className="bg-[#00A4AE] text-white">
                 <h3 className="text-xl font-black mb-8 italic">"Precisión en cada diagnóstico."</h3>
                 <div className="space-y-6">
                   <div className="p-5 bg-white/5 rounded-3xl border border-white/10">
                     <p className="text-[10px] uppercase text-[#DA6000] font-black mb-1">Nota Administrativa</p>
                     <p className="text-sm">Llegaron los nuevos armazones Ray-Ban. Revisar inventario.</p>
                   </div>
-                  <button className="w-full py-4 bg-white text-[#004b93] font-black rounded-2xl hover:scale-95 transition-all uppercase text-xs">Ver Reportes</button>
+                  <button className="w-full py-4 bg-white text-[#00A4AE] font-black rounded-2xl hover:scale-95 transition-all uppercase text-xs">Ver Reportes</button>
                 </div>
               </Card>
             </div>
@@ -368,7 +368,7 @@ export default function App() {
                           </div>
                         </td>
                         <td className="px-8 py-8 text-right">
-                          <button className="bg-[#004b93] text-white px-4 py-2 rounded-xl font-bold text-[10px] uppercase">Detalle</button>
+                          <button className="bg-[#DA6000] text-white px-4 py-2 rounded-xl font-bold text-[10px] uppercase shadow-lg shadow-orange-900/10 active:scale-95 transition-all">Detalle</button>
                         </td>
                       </tr>
                     ))}
@@ -383,17 +383,17 @@ export default function App() {
         return (
           <div className="space-y-10">
             <h2 className="text-3xl font-black text-slate-900">Nuestra Tienda</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
               {PRODUCTS.map(p => (
-                <div key={p.id} className="bg-white rounded-[40px] p-6 border border-slate-200 shadow-sm hover:shadow-xl transition-all group">
-                  <div className="h-56 rounded-[32px] overflow-hidden bg-slate-50 mb-6">
+                <div key={p.id} className="bg-white rounded-[32px] md:rounded-[40px] p-4 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl transition-all group">
+                  <div className="h-40 md:h-56 rounded-[24px] md:rounded-[32px] overflow-hidden bg-slate-50 mb-4 md:mb-6">
                     <img src={p.image} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700" />
                   </div>
-                  <h4 className="font-black text-slate-800 text-lg mb-2">{p.name}</h4>
-                  <div className="flex items-center justify-between mt-auto pt-6 border-t border-slate-100">
-                    <p className="text-2xl font-black text-slate-900">${p.price.toLocaleString()}</p>
-                    <button onClick={() => addToCart(p)} className="bg-[#DA6000] p-4 rounded-[22px] text-white shadow-lg shadow-[#DA6000]/20 hover:scale-105 transition-all">
-                      <Plus className="w-6 h-6" />
+                  <h4 className="font-black text-slate-800 text-sm md:text-lg mb-2 line-clamp-1">{p.name}</h4>
+                  <div className="flex items-center justify-between mt-auto pt-4 md:pt-6 border-t border-slate-100">
+                    <p className="text-lg md:text-2xl font-black text-slate-900">${p.price.toLocaleString()}</p>
+                    <button onClick={() => addToCart(p)} className="bg-[#DA6000] p-2 md:p-4 rounded-xl md:rounded-[22px] text-white shadow-lg shadow-[#DA6000]/20 hover:scale-105 transition-all">
+                      <Plus className="w-5 h-5 md:w-6 h-6" />
                     </button>
                   </div>
                 </div>
@@ -418,26 +418,29 @@ export default function App() {
       />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-24 bg-white border-b border-slate-200 flex items-center justify-between px-8 lg:px-12">
-          <div className="flex items-center gap-6">
+        <header className="h-24 bg-white border-b border-slate-200 flex items-center justify-between px-6 lg:px-12">
+          <div className="flex items-center gap-4 lg:gap-6">
             <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-3 bg-slate-50 rounded-2xl">
               <Menu className="w-7 h-7 text-slate-600" />
             </button>
-            <h1 className="text-xl font-black text-[#004b93] tracking-tighter">{role === 'Cliente' ? 'Óptica Optimax' : view}</h1>
+            <h1 className="text-lg lg:text-xl font-black text-[#00A4AE] tracking-tighter truncate max-w-[120px] lg:max-w-none">{role === 'Cliente' ? 'Óptica Optimax' : view}</h1>
           </div>
 
-          <div className="flex items-center gap-6">
-             <div className="hidden md:flex flex-col items-end">
-                <span className="text-[9px] font-black text-slate-400 uppercase">Cambiar Vista</span>
-                <select 
-                  value={role} 
-                  onChange={(e) => setRole(e.target.value as UserRole)}
-                  className="bg-transparent text-xs font-black text-[#DA6000] outline-none cursor-pointer text-right uppercase"
-                >
-                  <option value="Administrador">Admin</option>
-                  <option value="Optometrista">Optometrista</option>
-                  <option value="Cliente">Cliente (Catálogo)</option>
-                </select>
+          <div className="flex items-center gap-4 lg:gap-6">
+             <div className="hidden md:flex items-center gap-3 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+                {(['Administrador', 'Optometrista', 'Cliente'] as UserRole[]).map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => setRole(r)}
+                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                      role === r 
+                        ? 'bg-[#DA6000] text-white shadow-lg' 
+                        : 'text-slate-400 hover:text-[#DA6000]'
+                    }`}
+                  >
+                    {r === 'Cliente' ? 'Clientes' : r}
+                  </button>
+                ))}
              </div>
 
              <div className="flex items-center gap-4 border-l border-slate-200 pl-6">
@@ -445,7 +448,7 @@ export default function App() {
                   <ShoppingCart className="w-5 h-5" />
                   {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-[#DA6000] text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">{cartCount}</span>}
                 </button>
-                <div className="w-10 h-10 rounded-2xl bg-[#004b93] flex items-center justify-center text-white font-black shadow-lg">H</div>
+                <div className="w-10 h-10 rounded-2xl bg-[#00A4AE] flex items-center justify-center text-white font-black shadow-lg">H</div>
              </div>
           </div>
         </header>
@@ -470,7 +473,7 @@ export default function App() {
                 initial={{ opacity: 0, y: 50, x: '-50%' }}
                 animate={{ opacity: 1, y: 0, x: '-50%' }}
                 exit={{ opacity: 0, x: '-50%' }}
-                className="fixed bottom-12 left-1/2 bg-[#004b93] text-white px-8 py-5 rounded-[28px] shadow-2xl flex items-center gap-4 z-[100]"
+                className="fixed bottom-12 left-1/2 bg-[#00A4AE] text-white px-8 py-5 rounded-[28px] shadow-2xl flex items-center gap-4 z-[100]"
               >
                 <ShieldCheck className="w-5 h-5 text-emerald-400" />
                 <p className="text-xs font-black uppercase tracking-widest">{toast}</p>
