@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   LayoutDashboard, 
   Truck, 
@@ -21,386 +21,705 @@ import {
   UserCircle,
   LogOut,
   Menu,
-  X
+  X,
+  ShoppingCart,
+  Eye,
+  CheckCircle2,
+  Filter,
+  Phone,
+  Navigation,
+  CreditCard,
+  Plus,
+  Minus,
+  Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 // --- Types ---
 type Role = 'Admin' | 'Operador' | 'Técnico';
+type View = 'Dashboard' | 'Asistencia' | 'Flota' | 'Optica';
 
 interface Service {
   id: string;
-  type: 'Grúa' | 'Mecánico' | 'Combustible' | 'Cerrajero';
+  type: 'Grúa' | 'Cambio de Neumático' | 'Paso de Corriente' | 'Combustible' | 'Cerrajero';
+  vehicle: string;
+  plate: string;
   location: string;
-  status: 'En camino' | 'En sitio' | 'Pendiente' | 'Completado';
+  status: 'En camino' | 'En sitio' | 'Pendiente' | 'Finalizado';
   priority: 'Baja' | 'Media' | 'Alta';
   time: string;
 }
 
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+}
+
+interface Unit {
+  id: string;
+  operator: string;
+  status: 'Disponible' | 'Ocupado' | 'Fuera de Servicio';
+  lastLocation: string;
+}
+
 // --- Mock Data ---
 const SERVICES: Service[] = [
-  { id: 'SRV-001', type: 'Grúa', location: 'Autopista Sur KM 12', status: 'En camino', priority: 'Alta', time: '12 min' },
-  { id: 'SRV-002', type: 'Mecánico', location: 'Av. Reforma 450', status: 'En sitio', priority: 'Media', time: '25 min' },
-  { id: 'SRV-003', type: 'Combustible', location: 'Calle 50 #12-30', status: 'Pendiente', priority: 'Baja', time: '5 min' },
-  { id: 'SRV-004', type: 'Grúa', location: 'Zona Industrial Nte', status: 'En camino', priority: 'Alta', time: '18 min' },
-  { id: 'SRV-005', type: 'Cerrajero', location: 'Centro Comercial Plaza', status: 'Completado', priority: 'Baja', time: '1 hr' },
+  { id: 'OX-1021', type: 'Grúa', vehicle: 'Nissan Versa', plate: 'PXV-45-21 (CDMX)', location: 'Periférico Norte, Tlalnepantla', status: 'En camino', priority: 'Alta', time: '12 min' },
+  { id: 'OX-1022', type: 'Cambio de Neumático', vehicle: 'VW Jetta', plate: 'MWN-12-89 (EdoMex)', location: 'Circuito Interior, Condesa', status: 'En sitio', priority: 'Media', time: '5 min' },
+  { id: 'OX-1023', type: 'Paso de Corriente', vehicle: 'Toyota Hilux', plate: 'GTR-88-10 (N/A)', location: 'Av. Insurgentes Sur 1200', status: 'Pendiente', priority: 'Baja', time: '18 min' },
+  { id: 'OX-1024', type: 'Grúa', vehicle: 'Mazda 3', plate: 'ABC-12-34 (CDMX)', location: 'Viaducto Tlalpan', status: 'En camino', priority: 'Alta', time: '22 min' },
+  { id: 'OX-1025', type: 'Combustible', vehicle: 'Ford Explorer', plate: 'KLP-09-12 (EdoMex)', location: 'Autopista Méx-Qro KM 32', status: 'Finalizado', priority: 'Baja', time: '1 hr' },
+  { id: 'OX-1026', type: 'Cerrajero', vehicle: 'Honda Civic', plate: 'ZXX-55-44 (CDMX)', location: 'Polanco, Av. Horacio', status: 'En sitio', priority: 'Media', time: '15 min' },
+  { id: 'OX-1027', type: 'Grúa', vehicle: 'Chevrolet Aveo', plate: 'NML-33-22 (EdoMex)', location: 'Satélite, Torres de Satélite', status: 'Pendiente', priority: 'Alta', time: '30 min' },
+  { id: 'OX-1028', type: 'Cambio de Neumático', vehicle: 'Kia Forte', plate: 'TYU-11-99 (CDMX)', location: 'Reforma, Angel de Ind.', status: 'Finalizado', priority: 'Baja', time: '45 min' },
+  { id: 'OX-1029', type: 'Paso de Corriente', vehicle: 'Hyundai Accent', plate: 'QWE-77-66 (EdoMex)', location: 'Sta. Fe, Av. Vasco de Q.', status: 'En camino', priority: 'Media', time: '10 min' },
+  { id: 'OX-1030', type: 'Grúa', vehicle: 'BMW X5', plate: 'VIP-00-01 (CDMX)', location: 'Lomas de Chapultepec', status: 'En sitio', priority: 'Alta', time: '8 min' },
 ];
 
-const METRICS = {
-  servicesToday: 42,
-  freeTechnicians: 8,
-  avgArrivalTime: '18 min',
-  efficiency: '+12%'
+const PRODUCTS: Product[] = [
+  { id: 1, name: 'Lentes de Sol Aviador Premium', description: 'Protección UV400, marco de acero inoxidable.', price: 2450, image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&q=80&w=800' },
+  { id: 2, name: 'Armazón Oftálmico Titanium', description: 'Ligero, resistente y diseño minimalista.', price: 3800, image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&q=80&w=800' },
+  { id: 3, name: 'Lentes de Contacto Diarios (30pk)', description: 'Máxima hidratación para ojos sensibles.', price: 1200, image: 'https://images.unsplash.com/photo-1591076482161-42ce6da69f67?auto=format&fit=crop&q=80&w=800' },
+  { id: 4, name: 'Lentes Anti-Blue Light Modern', description: 'Ideal para trabajo prolongado frente a pantallas.', price: 1850, image: 'https://images.unsplash.com/photo-1511499767390-a7335958beba?auto=format&fit=crop&q=80&w=800' },
+  { id: 5, name: 'Estuche de Lujo "Optimax Black"', description: 'Protección rígida con acabado en piel sintética.', price: 550, image: 'https://images.unsplash.com/photo-1625591339762-430a30b3564c?auto=format&fit=crop&q=80&w=800' },
+];
+
+const UNITS: Unit[] = [
+  { id: 'U-01', operator: 'Roberto Sánchez', status: 'Disponible', lastLocation: 'CDMX - Cuauhtémoc' },
+  { id: 'U-05', operator: 'Miguel Angel Ruiz', status: 'Ocupado', lastLocation: 'EdoMex - Naucalpan' },
+  { id: 'U-12', operator: 'Karla Jimenéz', status: 'Disponible', lastLocation: 'CDMX - Miguel Hidalgo' },
+  { id: 'U-08', operator: 'Erik González', status: 'Fuera de Servicio', lastLocation: 'Base Central' },
+];
+
+// --- Theme Constants ---
+const COLORS = {
+  primary: '#004b93', // Professional Blue
+  primaryDark: '#003566',
+  accent: '#00a8e8', // Light Blue/Cyan
+  warning: '#fbbf24', // Amber/Yellow
+  success: '#10b981',
+  danger: '#ef4444',
+  bg: '#f8fafc',
+  sidebarBg: '#0f172a',
 };
 
 // --- Components ---
 
-const Sidebar = ({ currentRole, isOpen, setIsOpen }: { currentRole: Role, isOpen: boolean, setIsOpen: (v: boolean) => void }) => {
+const Sidebar = ({ 
+  currentRole, 
+  currentView, 
+  setView, 
+  isOpen, 
+  setIsOpen 
+}: { 
+  currentRole: Role, 
+  currentView: View,
+  setView: (v: View) => void,
+  isOpen: boolean, 
+  setIsOpen: (v: boolean) => void 
+}) => {
   const menuItems = useMemo(() => {
-    const common = [
-      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { id: 'map', label: 'Mapa en Vivo', icon: MapIcon },
+    const items = [
+      { id: 'Dashboard' as View, label: 'Dashboard', icon: LayoutDashboard },
+      { id: 'Asistencia' as View, label: 'Asistencia Vial', icon: AlertCircle },
+      { id: 'Flota' as View, label: 'Flota / Proveedores', icon: Truck },
+      { id: 'Optica' as View, label: 'Optimax Óptica', icon: Eye },
     ];
 
     if (currentRole === 'Admin') {
       return [
-        ...common,
-        { id: 'fleet', label: 'Gestión de Flota', icon: Truck },
-        { id: 'users', label: 'Usuarios', icon: Users },
-        { id: 'reports', label: 'Reportes Anuales', icon: TrendingUp },
-        { id: 'settings', label: 'Configuración', icon: Settings },
+        ...items,
+        { id: 'Reports' as any, label: 'Gestión Usuarios', icon: Users },
+        { id: 'Settings' as any, label: 'Configuración', icon: Settings },
       ];
     }
-
-    if (currentRole === 'Operador') {
-      return [
-        ...common,
-        { id: 'dispatch', label: 'Despacho Rápido', icon: ShieldCheck },
-        { id: 'active', label: 'Servicios Activos', icon: Clock },
-      ];
-    }
-
-    // Técnico
-    return [
-      { id: 'my-jobs', label: 'Mis Asignaciones', icon: Wrench },
-      { id: 'map', label: 'Navegación', icon: MapIcon },
-      { id: 'alerts', label: 'Avisos', icon: Bell },
-    ];
+    return items;
   }, [currentRole]);
 
   return (
-    <motion.aside 
-      initial={false}
-      animate={{ width: isOpen ? 260 : 0 }}
-      className={`fixed lg:relative z-40 h-screen bg-slate-950 text-slate-400 overflow-hidden border-r border-slate-800 transition-all duration-300 ease-in-out`}
-    >
-      <div className="p-6 flex flex-col h-full w-[260px]">
-        <div className="flex items-center gap-3 mb-10">
-          <div className="bg-yellow-400 p-2 rounded-lg">
-            <ShieldCheck className="text-slate-950 w-6 h-6" />
-          </div>
-          <span className="text-white font-bold text-xl tracking-tight italic">OPTIMAX</span>
-        </div>
+    <>
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsOpen(false)}
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
+          />
+        )}
+      </AnimatePresence>
 
-        <nav className="flex-1 space-y-1">
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-900 hover:text-yellow-400 transition-all group"
-            >
-              <item.icon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              <span className="font-medium text-sm">{item.label}</span>
-              {item.id === 'alerts' && (
-                <span className="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">3</span>
-              )}
+      <motion.aside 
+        initial={false}
+        animate={{ 
+          x: isOpen ? 0 : -280,
+          width: 280 
+        }}
+        className={`fixed lg:relative z-50 h-screen bg-slate-950 text-slate-400 overflow-hidden border-r border-slate-800 shadow-2xl transition-all duration-300 ease-in-out lg:translate-x-0`}
+      >
+        <div className="p-6 flex flex-col h-full w-[280px]">
+          <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center gap-3">
+              <img src="https://cossma.com.mx/optimax.png" alt="Optimax Logo" className="h-10 w-auto" />
+              <span className="text-white font-bold text-xl tracking-tight hidden">OPTIMAX</span>
+            </div>
+            <button onClick={() => setIsOpen(false)} className="lg:hidden p-2 hover:bg-slate-800 rounded-full transition-colors">
+              <X className="w-5 h-5" />
             </button>
-          ))}
-        </nav>
+          </div>
 
-        <div className="pt-6 border-t border-slate-800">
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/10 hover:text-red-400 transition-all">
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium text-sm">Cerrar Sesión</span>
-          </button>
+          <nav className="flex-1 space-y-1">
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => {
+                  if (item.id in { Dashboard: 1, Asistencia: 1, Flota: 1, Optica: 1 }) {
+                    setView(item.id as View);
+                    if (window.innerWidth < 1024) setIsOpen(false);
+                  }
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all group ${
+                  currentView === item.id 
+                    ? 'bg-[#004b93] text-white shadow-lg shadow-[#004b93]/30' 
+                    : 'hover:bg-slate-900 hover:text-white'
+                }`}
+              >
+                <item.icon className={`w-5 h-5 transition-transform ${currentView === item.id ? 'scale-110' : 'group-hover:scale-110'}`} />
+                <span className="font-semibold text-sm">{item.label}</span>
+              </button>
+            ))}
+          </nav>
+
+          <div className="pt-6 border-t border-slate-800">
+            <div className="bg-slate-900/50 p-4 rounded-2xl mb-6 flex items-center gap-3">
+              <div className="bg-[#004b93] p-1 rounded-full">
+                <ShieldCheck className="w-4 h-4 text-white" />
+              </div>
+              <p className="text-[10px] uppercase font-bold tracking-widest text-slate-500">Soporte 24/7 Activo</p>
+            </div>
+            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/10 hover:text-red-400 transition-all font-bold text-sm">
+              <LogOut className="w-5 h-5" />
+              <span>Cerrar Sesión</span>
+            </button>
+          </div>
         </div>
-      </div>
-    </motion.aside>
+      </motion.aside>
+    </>
   );
 };
 
-const MetricCard = ({ title, value, icon: Icon, trend }: { title: string, value: string | number, icon: any, trend?: string }) => (
-  <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-    <div className="flex justify-between items-start mb-4">
-      <div className="p-3 bg-slate-50 rounded-2xl">
-        <Icon className="w-6 h-6 text-slate-600" />
+const Header = ({ 
+  role, 
+  setRole, 
+  toggleSidebar, 
+  cartCount,
+  currentView
+}: { 
+  role: Role, 
+  setRole: (r: Role) => void, 
+  toggleSidebar: () => void, 
+  cartCount: number,
+  currentView: string
+}) => (
+  <header className="sticky top-0 z-30 flex items-center justify-between px-6 lg:px-8 py-4 bg-white/70 backdrop-blur-xl border-b border-slate-200">
+    <div className="flex items-center gap-4">
+      <button 
+        onClick={toggleSidebar}
+        className="p-2 hover:bg-slate-100 rounded-xl transition-colors lg:hidden"
+      >
+        <Menu className="w-6 h-6 text-slate-600" />
+      </button>
+      <div>
+        <h1 className="text-xl font-extrabold text-slate-900 tracking-tight leading-none">{currentView}</h1>
+        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Gestión Centralizada</p>
       </div>
-      {trend && (
-        <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-lg">
-          {trend}
-        </span>
-      )}
     </div>
-    <h3 className="text-slate-500 text-sm font-medium mb-1">{title}</h3>
-    <p className="text-2xl font-bold text-slate-900 tracking-tight">{value}</p>
+
+    <div className="flex items-center gap-4 lg:gap-8">
+      {/* Role Switcher */}
+      <div className="hidden md:flex bg-slate-100 p-1.5 rounded-xl gap-1">
+        {(['Admin', 'Operador', 'Técnico'] as Role[]).map((r) => (
+          <button
+            key={r}
+            onClick={() => setRole(r)}
+            className={`px-4 py-1.5 rounded-lg text-[11px] font-black tracking-tight transition-all uppercase ${
+              role === r ? 'bg-white text-[#004b93] shadow-md' : 'text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            {r}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex items-center gap-4 lg:gap-6 pl-4 lg:pl-8 border-l border-slate-200">
+        <button className="relative p-2 text-slate-400 hover:text-[#004b93] transition-colors group">
+          <ShoppingCart className="w-6 h-6 transition-transform group-hover:scale-110" />
+          {cartCount > 0 && (
+            <motion.span 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              key={cartCount}
+              className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white shadow-sm"
+            >
+              {cartCount}
+            </motion.span>
+          )}
+        </button>
+        
+        <div className="flex items-center gap-3">
+          <div className="text-right hidden sm:block">
+            <p className="text-sm font-bold text-slate-800">Diego Armando</p>
+            <p className="text-[10px] text-[#004b93] uppercase font-black tracking-tighter">Verified {role}</p>
+          </div>
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#004b93] to-[#00a8e8] flex items-center justify-center overflow-hidden shadow-lg shadow-blue-200">
+            <UserCircle className="w-7 h-7 text-white" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+);
+
+const SectionHeader = ({ title, subtitle, action }: { title: string, subtitle: string, action?: React.ReactNode }) => (
+  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div>
+      <h2 className="text-3xl font-black tracking-tight text-slate-900 drop-shadow-sm">{title}</h2>
+      <p className="text-slate-500 mt-1 font-medium italic">{subtitle}</p>
+    </div>
+    {action}
   </div>
 );
 
-const ACTIVE_THEME = {
-  'En camino': 'bg-blue-100 text-blue-700',
-  'En sitio': 'bg-yellow-100 text-yellow-700',
-  'Pendiente': 'bg-slate-100 text-slate-600',
-  'Completado': 'bg-green-100 text-green-700',
-};
-
-const PRIORITY_COLOR = {
-  'Alta': 'text-red-500',
-  'Media': 'text-orange-500',
-  'Baja': 'text-blue-500',
-};
-
 export default function App() {
   const [role, setRole] = useState<Role>('Admin');
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [view, setView] = useState<View>('Dashboard');
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [toast, setToast] = useState<string | null>(null);
 
-  return (
-    <div className="flex min-h-screen bg-slate-50 font-sans text-slate-900">
-      <Sidebar currentRole={role} isOpen={isSidebarOpen} setIsOpen={setSidebarOpen} />
+  // Auto-hide toast
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
-        {/* Header */}
-        <header className="sticky top-0 z-30 flex items-center justify-between px-8 py-4 bg-white/80 backdrop-blur-md border-bottom border-slate-200">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setSidebarOpen(!isSidebarOpen)}
-              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-            >
-              {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Panel de {role}</h1>
-          </div>
+  const filteredServices = useMemo(() => {
+    return SERVICES.filter(s => 
+      s.plate.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      s.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.location.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [searchTerm]);
 
-          <div className="flex items-center gap-6">
-            {/* Role Switcher for Demo */}
-            <div className="hidden md:flex bg-slate-100 p-1 rounded-xl gap-1">
-              {(['Admin', 'Operador', 'Técnico'] as Role[]).map((r) => (
-                <button
-                  key={r}
-                  onClick={() => setRole(r)}
-                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                    role === r ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                  }`}
-                >
-                  {r}
+  const addToCart = (product: string) => {
+    setCartCount(prev => prev + 1);
+    setToast(`¡${product} añadido al carrito!`);
+  };
+
+  const renderContent = () => {
+    switch (view) {
+      case 'Dashboard':
+        return (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <SectionHeader 
+              title="Panel Principal" 
+              subtitle="Monitoreo de rendimiento y métricas operativas diarias." 
+              action={
+                <button className="flex items-center gap-2 bg-[#004b93] hover:bg-[#003566] text-white font-bold px-8 py-4 rounded-2xl transition-all shadow-xl shadow-blue-900/20 active:scale-95 group">
+                  <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" />
+                  Nueva Asignación
                 </button>
+              }
+            />
+
+            {/* Metrics */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { label: 'Servicios Activos', value: '8', icon: AlertCircle, color: 'text-blue-600', bg: 'bg-blue-100', trend: '+2 hoy' },
+                { label: 'Ingresos del Día', value: '$12,500', icon: CreditCard, color: 'text-green-600', bg: 'bg-green-100', trend: '$ MXN' },
+                { label: 'Alertas de Flota', value: '2', icon: Bell, color: 'text-red-600', bg: 'bg-red-100', trend: 'Críticas' },
+                { label: 'SLA Promedio', value: '18 min', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-100', trend: '-2% vs ayer' },
+              ].map((m, i) => (
+                <motion.div 
+                  key={i}
+                  whileHover={{ y: -5 }}
+                  className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm transition-all"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div className={`p-3 ${m.bg} rounded-2xl`}>
+                      <m.icon className={`w-6 h-6 ${m.color}`} />
+                    </div>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{m.trend}</span>
+                  </div>
+                  <h3 className="text-slate-500 text-xs font-bold uppercase tracking-tight mb-1">{m.label}</h3>
+                  <p className="text-3xl font-black text-slate-900">{m.value}</p>
+                </motion.div>
               ))}
             </div>
 
-            <div className="flex items-center gap-3 pl-6 border-l border-slate-200">
-              <div className="text-right hidden sm:block">
-                <p className="text-xs font-bold text-slate-900">Diego Armando</p>
-                <p className="text-[10px] text-slate-500 uppercase font-medium">{role}</p>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
-                <UserCircle className="w-6 h-6 text-slate-400" />
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Content */}
-        <div className="p-8 space-y-8 max-w-7xl mx-auto w-full">
-          {/* Welcome Section */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-3xl font-bold tracking-tight text-slate-900">Bienvenido de nuevo, Diego</h2>
-              <p className="text-slate-500 mt-1 italic">Optimax protege hoy a +2,400 conductores en red.</p>
-            </div>
-            <button className="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-slate-950 font-bold px-6 py-3 rounded-2xl transition-all shadow-lg shadow-yellow-400/20 active:scale-95">
-              <AlertCircle className="w-5 h-5" />
-              Nuevo Incidente
-            </button>
-          </div>
-
-          {/* Metrics Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <MetricCard 
-              title="Servicios Activos" 
-              value={role === 'Técnico' ? 2 : METRICS.servicesToday} 
-              icon={LayoutDashboard} 
-              trend="+14%" 
-            />
-            <MetricCard 
-              title="Técnicos Disponibles" 
-              value={METRICS.freeTechnicians} 
-              icon={Users} 
-            />
-            <MetricCard 
-              title="Promedio de Arribo" 
-              value={METRICS.avgArrivalTime} 
-              icon={Clock} 
-              trend="-2 min" 
-            />
-            <MetricCard 
-              title="Satisfacción" 
-              value="98.2%" 
-              icon={ShieldCheck} 
-            />
-          </div>
-
-          {/* Main Dashboard Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Map Widget */}
-            <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden h-full min-h-[400px] flex flex-col">
-              <div className="p-6 border-b border-slate-50 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <MapIcon className="w-5 h-5 text-slate-400" />
-                  <h3 className="font-bold text-slate-800">Mapa Georreferenciado</h3>
+            {/* Dashboard Visuals */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 bg-white rounded-[32px] border border-slate-100 shadow-sm p-8 flex flex-col h-[500px]">
+                <div className="flex justify-between items-center mb-8">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center">
+                      <Navigation className="w-5 h-5 text-[#004b93]" />
+                    </div>
+                    <h3 className="text-lg font-black text-slate-800">Mapa Satelital de Operaciones</h3>
+                  </div>
+                  <div className="flex bg-slate-50 p-1 rounded-xl">
+                    <button className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-white shadow-sm text-[#004b93]">TODO</button>
+                    <button className="px-3 py-1.5 rounded-lg text-[10px] font-bold text-slate-400">FILTRAR</button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <span className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                    <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" /> Flota Activa
-                  </span>
+                <div className="flex-1 bg-slate-950 rounded-[28px] relative overflow-hidden group">
+                  <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60" />
+                  
+                  {/* Decorative Elements for Map Simulation */}
+                  <div className="absolute inset-0 pointer-events-none opacity-20">
+                     <div className="w-full h-full border border-white/5 grid grid-cols-12 grid-rows-8" />
+                  </div>
+
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+                    <motion.div 
+                      animate={{ scale: [1, 1.1, 1] }} 
+                      transition={{ duration: 4, repeat: Infinity }}
+                      className="w-48 h-48 bg-blue-500/20 rounded-full blur-[80px]" 
+                    />
+                    <div className="relative z-10">
+                      <p className="text-blue-400 font-mono text-[10px] uppercase tracking-[0.3em] mb-4">Live Tracking v4.2</p>
+                      <h4 className="text-white text-xl font-black mb-2 italic">Ciudad de México & Zona Metrop.</h4>
+                      <div className="flex gap-4 justify-center items-center mt-6">
+                        <div className="flex flex-col items-center">
+                          <span className="text-2xl font-black text-white">42</span>
+                          <span className="text-[10px] text-slate-500 font-bold uppercase">Unidades</span>
+                        </div>
+                        <div className="w-px h-8 bg-slate-800" />
+                        <div className="flex flex-col items-center">
+                          <span className="text-2xl font-black text-blue-400">31</span>
+                          <span className="text-[10px] text-slate-500 font-bold uppercase">En Ruta</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Simulated Dynamic Pins */}
+                  {[
+                    { t: '15%', l: '20%', c: 'bg-green-500' },
+                    { t: '60%', l: '40%', c: 'bg-blue-500' },
+                    { t: '30%', l: '80%', c: 'bg-red-500' },
+                    { t: '75%', l: '70%', c: 'bg-yellow-400' },
+                  ].map((p, i) => (
+                    <motion.div 
+                      key={i}
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 2 + i, repeat: Infinity }}
+                      style={{ top: p.t, left: p.l }}
+                      className={`absolute w-3 h-3 rounded-full border-2 border-white shadow-[0_0_15px_rgba(255,255,255,0.5)] ${p.c}`}
+                    />
+                  ))}
                 </div>
               </div>
-              <div className="flex-1 bg-slate-900 relative overflow-hidden group">
-                {/* Fake Map Grid Background */}
-                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
+
+              <div className="bg-[#004b93] rounded-[32px] p-8 text-white relative overflow-hidden flex flex-col justify-between group">
+                <div className="relative z-10">
+                  <h3 className="text-xl font-black mb-6 flex items-center gap-3">
+                    <TrendingUp className="w-6 h-6 text-blue-300" />
+                    Proyección de Servicios
+                  </h3>
+                  <div className="space-y-6">
+                    <div>
+                      <div className="flex justify-between text-xs font-bold mb-2 uppercase tracking-tight">
+                        <span className="text-blue-100">Grúas (Especializadas)</span>
+                        <span className="text-white">88%</span>
+                      </div>
+                      <div className="h-2 bg-blue-900/50 rounded-full overflow-hidden">
+                        <motion.div initial={{ width: 0 }} animate={{ width: '88%' }} className="h-full bg-blue-400" />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs font-bold mb-2 uppercase tracking-tight">
+                        <span className="text-blue-100">Mecánica menor</span>
+                        <span className="text-white">64%</span>
+                      </div>
+                      <div className="h-2 bg-blue-900/50 rounded-full overflow-hidden">
+                        <motion.div initial={{ width: 0 }} animate={{ width: '64%' }} className="h-full bg-white" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 
-                {/* Placeholder Icons for Map */}
-                <motion.div 
-                  animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-                  transition={{ repeat: Infinity, duration: 3 }}
-                  className="absolute top-1/3 left-1/4 w-32 h-32 bg-blue-500/20 rounded-full blur-xl"
-                />
-                
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="text-center px-6 py-4 bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl">
-                    <p className="text-white/60 text-xs font-mono mb-2 uppercase tracking-tighter">Lat: 19.4326 | Lon: -99.1332</p>
-                    <p className="text-white font-medium">Ubicación de Unidades en Tiempo Real</p>
-                    <p className="text-yellow-400 text-xs mt-1">Sincronizado vía Satélite</p>
+                <div className="relative z-10 pt-8">
+                  <div className="bg-blue-800/40 border border-blue-700/50 p-4 rounded-2xl">
+                    <p className="text-[11px] font-bold text-blue-200 uppercase mb-1">Dato del Mes</p>
+                    <p className="text-sm font-medium italic leading-relaxed text-blue-50">"La demanda de servicios de grúa aumentó un 12% en zona periférica."</p>
                   </div>
                 </div>
 
-                {/* Simulated Pins */}
-                <div className="absolute top-[40%] right-[30%] bg-blue-500 w-3 h-3 rounded-full border-2 border-white shadow-lg" />
-                <div className="absolute bottom-[20%] left-[45%] bg-yellow-400 w-3 h-3 rounded-full border-2 border-slate-900 shadow-lg" />
-                <div className="absolute top-[20%] left-[60%] bg-green-500 w-3 h-3 rounded-full border-2 border-white shadow-lg" />
+                {/* Decorative Abstract Logic */}
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-400 opacity-20 blur-3xl rounded-full" />
+                <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-blue-300 opacity-10 blur-[100px] rounded-full group-hover:scale-125 transition-transform duration-1000" />
               </div>
             </div>
+          </div>
+        );
 
-            {/* Side Panel: Quick Actions/Alerts */}
-            <div className="bg-slate-900 rounded-3xl p-6 text-white overflow-hidden relative">
-              <div className="relative z-10">
-                <h3 className="font-bold text-lg mb-6 flex items-center gap-2">
-                  <Bell className="w-5 h-5 text-yellow-400" />
-                  Alertas Críticas
-                </h3>
-                <div className="space-y-4">
-                  {[
-                    { msg: 'Accidente Múltiple en Km 40', time: 'hace 2m', color: 'bg-red-500' },
-                    { msg: 'Falla mecánica: Juan Pérez', time: 'hace 10m', color: 'bg-yellow-500' },
-                    { msg: 'Grúa #12 en retorno', time: 'hace 15m', color: 'bg-blue-500' },
-                  ].map((alert, i) => (
-                    <motion.div 
-                      key={i}
-                      initial={{ x: 50, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: i * 0.1 }}
-                      className="p-4 bg-slate-800/50 rounded-2xl border border-slate-700 flex gap-4 items-start"
-                    >
-                      <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${alert.color}`} />
-                      <div>
-                        <p className="text-sm font-medium leading-tight">{alert.msg}</p>
-                        <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold">{alert.time}</p>
-                      </div>
-                    </motion.div>
-                  ))};
+      case 'Asistencia':
+        return (
+          <div className="animate-in fade-in zoom-in-95 duration-500">
+            <SectionHeader 
+              title="Asistencia Vial" 
+              subtitle="Control total sobre las incidencias en curso."
+              action={
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input 
+                      type="text" 
+                      placeholder="Placa, Tipo, Ubicación..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-11 pr-6 py-4 bg-white border border-slate-200 rounded-[24px] text-sm w-full md:w-80 focus:ring-4 focus:ring-blue-100 shadow-sm focus:border-[#004b93] transition-all outline-none"
+                    />
+                  </div>
+                  <button className="p-4 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 transition-colors shadow-sm">
+                    <Filter className="w-5 h-5 text-slate-600" />
+                  </button>
                 </div>
-                
-                <button className="w-full mt-8 py-3 border border-slate-700 rounded-xl text-sm font-bold hover:bg-slate-800 transition-colors">
-                  Ver Todas las Alertas
-                </button>
+              }
+            />
+
+            <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto min-h-[400px]">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50/50">
+                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Servicio / Placa</th>
+                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Vehículo</th>
+                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Ubicación</th>
+                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Estatus</th>
+                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Arribo</th>
+                      <th className="px-8 py-5"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    <AnimatePresence mode="popLayout">
+                      {filteredServices.map((srv, idx) => (
+                        <motion.tr 
+                          key={srv.id}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.03 }}
+                          className="hover:bg-slate-50/50 transition-colors group"
+                        >
+                          <td className="px-8 py-6">
+                            <div className="flex flex-col">
+                              <span className="text-sm font-black text-[#004b93] tracking-tight">{srv.id}</span>
+                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-1">{srv.plate}</span>
+                            </div>
+                          </td>
+                          <td className="px-8 py-6">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center">
+                                {srv.type.includes('Grúa') ? <Truck className="w-4 h-4 text-slate-400" /> : <Wrench className="w-4 h-4 text-slate-400" />}
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-sm font-bold text-slate-700">{srv.type}</span>
+                                <span className="text-[10px] text-slate-400 font-medium">{srv.vehicle}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-8 py-6">
+                            <div className="flex items-center gap-2">
+                              <MapIcon className="w-3 h-3 text-slate-400" />
+                              <span className="text-sm text-slate-600 font-medium truncate max-w-[200px]">{srv.location}</span>
+                            </div>
+                          </td>
+                          <td className="px-8 py-6 text-center">
+                            <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight ${
+                              srv.status === 'En camino' ? 'bg-blue-100 text-blue-700' :
+                              srv.status === 'En sitio' ? 'bg-amber-100 text-amber-700' :
+                              srv.status === 'Finalizado' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'
+                            }`}>
+                              {srv.status}
+                            </span>
+                          </td>
+                          <td className="px-8 py-6 text-center">
+                            <div className="flex flex-col items-center">
+                              <span className="text-sm font-black text-slate-800">{srv.time}</span>
+                              <span className={`text-[9px] font-bold uppercase tracking-widest ${
+                                srv.priority === 'Alta' ? 'text-red-500' : 'text-slate-400'
+                              }`}>{srv.priority}</span>
+                            </div>
+                          </td>
+                          <td className="px-8 py-6 text-right">
+                            <button className="p-3 bg-white border border-slate-100 rounded-2xl hover:border-[#004b93] hover:text-[#004b93] transition-all shadow-sm">
+                              <ChevronRight className="w-5 h-5" />
+                            </button>
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </AnimatePresence>
+                  </tbody>
+                </table>
               </div>
-              {/* Decorative Circle */}
-              <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-yellow-400/10 rounded-full blur-3xl transition-transform group-hover:scale-150" />
             </div>
+          </div>
+        );
+
+      case 'Flota':
+          return (
+            <div className="animate-in slide-in-from-right-4 duration-500">
+               <SectionHeader 
+                  title="Flota y Proveedores" 
+                  subtitle="Monitoreo de unidades y disponibilidad de operadores."
+                />
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                  {UNITS.map((unit, i) => (
+                    <motion.div 
+                      key={unit.id}
+                      whileHover={{ scale: 1.02 }}
+                      className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm relative overflow-hidden"
+                    >
+                      <div className="flex justify-between items-start mb-6">
+                        <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center">
+                          <Truck className="w-6 h-6 text-blue-400" />
+                        </div>
+                        <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full ${
+                          unit.status === 'Disponible' ? 'bg-green-100 text-green-700' :
+                          unit.status === 'Ocupado' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'
+                        }`}>
+                          {unit.status}
+                        </span>
+                      </div>
+                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Unidad {unit.id}</h4>
+                      <p className="text-lg font-black text-slate-900 mb-4">{unit.operator}</p>
+                      
+                      <div className="space-y-3 pt-4 border-t border-slate-50">
+                        <div className="flex items-center gap-2 text-slate-500">
+                          <MapIcon className="w-4 h-4" />
+                          <span className="text-xs font-medium">{unit.lastLocation}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-slate-500">
+                          <Phone className="w-4 h-4" />
+                          <span className="text-xs font-medium">+52 55 #### ####</span>
+                        </div>
+                      </div>
+
+                      <button className="w-full mt-6 py-3 bg-slate-50 hover:bg-[#004b93] hover:text-white rounded-2xl text-xs font-black transition-all uppercase tracking-tighter">
+                        Ver Historial
+                      </button>
+                    </motion.div>
+                  ))}
+                </div>
+            </div>
+          );
+
+      case 'Optica':
+        return (
+          <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+            <SectionHeader 
+              title="Optimax Óptica" 
+              subtitle="Protección visual de alta gama para nuestros conductores y red de socios."
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {PRODUCTS.map((p) => (
+                <motion.div 
+                  key={p.id}
+                  whileHover={{ y: -10 }}
+                  className="bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-sm flex flex-col group"
+                >
+                  <div className="h-64 overflow-hidden relative">
+                    <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                      <button className="p-3 bg-white rounded-full hover:bg-[#004b93] hover:text-white transition-all shadow-xl">
+                        <Eye className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-4 py-1.5 rounded-full shadow-sm">
+                      <p className="text-sm font-black text-[#004b93]">${p.price.toLocaleString()} <span className="text-[10px] text-slate-400">MXN</span></p>
+                    </div>
+                  </div>
+                  <div className="p-8 flex flex-col flex-1">
+                    <h4 className="text-lg font-black text-slate-900 leading-tight mb-2">{p.name}</h4>
+                    <p className="text-slate-500 text-sm font-medium line-clamp-2 mb-6 italic">{p.description}</p>
+                    <div className="mt-auto">
+                        <button 
+                          onClick={() => addToCart(p.name)}
+                          className="w-full bg-[#004b93] hover:bg-[#003566] text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-95 shadow-lg shadow-[#004b93]/20"
+                        >
+                          <Plus className="w-5 h-5" />
+                          Añadir al Carrito
+                        </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        );
+
+      default:
+        return <div>Seleccione una opción del menú.</div>;
+    }
+  };
+
+  return (
+    <div className="flex h-screen bg-[#f8fafc] font-sans selection:bg-blue-100 selection:text-[#004b93] overflow-hidden">
+      <Sidebar 
+        currentRole={role} 
+        currentView={view}
+        setView={setView}
+        isOpen={isSidebarOpen} 
+        setIsOpen={setSidebarOpen} 
+      />
+
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        <Header 
+          role={role} 
+          setRole={setRole} 
+          toggleSidebar={() => setSidebarOpen(true)} 
+          cartCount={cartCount}
+          currentView={view}
+        />
+
+        <main className="flex-1 overflow-y-auto overflow-x-hidden relative p-4 md:p-8 lg:p-12">
+          <div className="max-w-7xl mx-auto w-full pb-20">
+            {renderContent()}
           </div>
 
-          {/* Services Table */}
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden mb-8">
-            <div className="p-6 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h3 className="font-bold text-slate-800">Servicios Activos</h3>
-                <p className="text-xs text-slate-500 mt-0.5 italic">Monitoreo de incidencias en proceso.</p>
-              </div>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input 
-                  type="text" 
-                  placeholder="Buscar por ID o Lugar..."
-                  className="pl-10 pr-4 py-2 bg-slate-50 border-none rounded-xl text-sm w-full md:w-64 focus:ring-2 focus:ring-yellow-400 transition-all outline-none"
-                />
-              </div>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-50/50">
-                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID Servicio</th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tipo</th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ubicación</th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Estatus</th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Prioridad</th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Arribo</th>
-                    <th className="px-6 py-4"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  <AnimatePresence mode="popLayout">
-                    {SERVICES.map((srv, idx) => (
-                      <motion.tr 
-                        key={srv.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.05 }}
-                        className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
-                      >
-                        <td className="px-6 py-4 text-sm font-bold text-slate-900">{srv.id}</td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            {srv.type === 'Grúa' ? <Truck className="w-4 h-4 text-slate-400" /> : <Wrench className="w-4 h-4 text-slate-400" />}
-                            <span className="text-sm text-slate-600">{srv.type}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-slate-500">{srv.location}</td>
-                        <td className="px-6 py-4 text-center">
-                          <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight ${ACTIVE_THEME[srv.status]}`}>
-                            {srv.status}
-                          </span>
-                        </td>
-                        <td className={`px-6 py-4 text-sm font-bold ${PRIORITY_COLOR[srv.priority]}`}>
-                          {srv.priority}
-                        </td>
-                        <td className="px-6 py-4 text-sm font-medium text-slate-900">{srv.time}</td>
-                        <td className="px-6 py-4 text-right">
-                          <button className="p-2 hover:bg-white rounded-lg transition-colors group-hover:shadow-sm">
-                            <ChevronRight className="w-4 h-4 text-slate-400" />
-                          </button>
-                        </td>
-                      </motion.tr>
-                    ))}
-                  </AnimatePresence>
-                </tbody>
-              </table>
-            </div>
-            <div className="p-4 bg-slate-50/30 border-t border-slate-50 text-center">
-              <button className="text-xs font-bold text-slate-400 hover:text-slate-600 uppercase tracking-widest transition-colors">
-                Cargar Más Servicios
-              </button>
-            </div>
-          </div>
-        </div>
-      </main>
+          {/* Toast Notification */}
+          <AnimatePresence>
+            {toast && (
+              <motion.div 
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-slate-900 text-white px-8 py-4 rounded-3xl shadow-2xl border border-white/10 flex items-center gap-4 min-w-[300px]"
+              >
+                <div className="p-1 bg-green-500 rounded-full">
+                  <CheckCircle2 className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-sm font-bold tracking-tight">{toast}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Background Decorative Blobs */}
+          <div className="fixed top-20 right-0 w-[600px] h-[600px] bg-blue-100/30 rounded-full blur-[120px] pointer-events-none -z-10" />
+          <div className="fixed bottom-0 left-0 w-[400px] h-[400px] bg-sky-100/20 rounded-full blur-[100px] pointer-events-none -z-10" />
+        </main>
+      </div>
     </div>
   );
 }

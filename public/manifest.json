@@ -1,0 +1,16 @@
+{
+  "name": "Optimax - Asistencia & Protección Vial",
+  "short_name": "Optimax",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#004b93",
+  "icons": [
+    {
+      "src": "https://cossma.com.mx/optimax.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
