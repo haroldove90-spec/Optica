@@ -96,14 +96,14 @@ const UNITS: Unit[] = [
 
 // --- Theme Constants ---
 const COLORS = {
-  primary: '#004b93', // Professional Blue
-  primaryDark: '#003566',
-  accent: '#00a8e8', // Light Blue/Cyan
-  warning: '#fbbf24', // Amber/Yellow
+  primary: '#00A4AE', // Brand Teal
+  primaryDark: '#008b94',
+  accent: '#DA6000', // Brand Orange
+  warning: '#fbbf24',
   success: '#10b981',
   danger: '#ef4444',
   bg: '#f8fafc',
-  sidebarBg: '#0f172a',
+  sidebarBg: '#00A4AE',
 };
 
 // --- Components ---
@@ -157,18 +157,19 @@ const Sidebar = ({
       <motion.aside 
         initial={false}
         animate={{ 
-          x: isOpen ? 0 : -280,
+          x: isOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 1024 ? -280 : 0),
           width: 280 
         }}
-        className={`fixed lg:relative z-50 h-screen bg-slate-950 text-slate-400 overflow-hidden border-r border-slate-800 shadow-2xl transition-all duration-300 ease-in-out lg:translate-x-0`}
+        className={`fixed lg:relative z-50 h-screen bg-[#00A4AE] text-white/80 overflow-hidden border-r border-white/10 shadow-2xl transition-all duration-300 ease-in-out lg:translate-x-0 cursor-default`}
       >
         <div className="p-6 flex flex-col h-full w-[280px]">
           <div className="flex items-center justify-between mb-10">
             <div className="flex items-center gap-3">
-              <img src="https://cossma.com.mx/optimax.png" alt="Optimax Logo" className="h-10 w-auto" />
-              <span className="text-white font-bold text-xl tracking-tight hidden">OPTIMAX</span>
+              <div className="bg-white p-1 rounded-xl">
+                <img src="https://cossma.com.mx/optimax.png" alt="Optimax Logo" className="h-10 w-auto" />
+              </div>
             </div>
-            <button onClick={() => setIsOpen(false)} className="lg:hidden p-2 hover:bg-slate-800 rounded-full transition-colors">
+            <button onClick={() => setIsOpen(false)} className="lg:hidden p-2 hover:bg-white/10 rounded-full transition-colors text-white">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -185,8 +186,8 @@ const Sidebar = ({
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all group ${
                   currentView === item.id 
-                    ? 'bg-[#004b93] text-white shadow-lg shadow-[#004b93]/30' 
-                    : 'hover:bg-slate-900 hover:text-white'
+                    ? 'bg-[#DA6000] text-white shadow-lg shadow-black/20' 
+                    : 'hover:bg-white/10 hover:text-white text-white/70'
                 }`}
               >
                 <item.icon className={`w-5 h-5 transition-transform ${currentView === item.id ? 'scale-110' : 'group-hover:scale-110'}`} />
@@ -195,14 +196,14 @@ const Sidebar = ({
             ))}
           </nav>
 
-          <div className="pt-6 border-t border-slate-800">
-            <div className="bg-slate-900/50 p-4 rounded-2xl mb-6 flex items-center gap-3">
-              <div className="bg-[#004b93] p-1 rounded-full">
-                <ShieldCheck className="w-4 h-4 text-white" />
+          <div className="pt-6 border-t border-white/10">
+            <div className="bg-white/10 p-4 rounded-2xl mb-6 flex items-center gap-3">
+              <div className="bg-white p-1 rounded-full">
+                <ShieldCheck className="w-4 h-4 text-[#00A4AE]" />
               </div>
-              <p className="text-[10px] uppercase font-bold tracking-widest text-slate-500">Soporte 24/7 Activo</p>
+              <p className="text-[10px] uppercase font-bold tracking-widest text-white/60">Soporte 24/7 Activo</p>
             </div>
-            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/10 hover:text-red-400 transition-all font-bold text-sm">
+            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500 hover:text-white transition-all font-bold text-sm text-white/70">
               <LogOut className="w-5 h-5" />
               <span>Cerrar Sesión</span>
             </button>
@@ -226,29 +227,29 @@ const Header = ({
   cartCount: number,
   currentView: string
 }) => (
-  <header className="sticky top-0 z-30 flex items-center justify-between px-6 lg:px-8 py-4 bg-white/70 backdrop-blur-xl border-b border-slate-200">
+  <header className="sticky top-0 z-30 flex items-center justify-between px-6 lg:px-8 py-4 bg-[#00A4AE] border-b border-white/10 shadow-md">
     <div className="flex items-center gap-4">
       <button 
         onClick={toggleSidebar}
-        className="p-2 hover:bg-slate-100 rounded-xl transition-colors lg:hidden"
+        className="p-2 hover:bg-white/10 rounded-xl transition-colors lg:hidden"
       >
-        <Menu className="w-6 h-6 text-slate-600" />
+        <Menu className="w-6 h-6 text-white" />
       </button>
-      <div>
-        <h1 className="text-xl font-extrabold text-slate-900 tracking-tight leading-none">{currentView}</h1>
-        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Gestión Centralizada</p>
+      <div className="text-white">
+        <h1 className="text-xl font-extrabold tracking-tight leading-none">{currentView}</h1>
+        <p className="text-[10px] text-white/60 font-bold uppercase tracking-widest mt-1">Gestión Centralizada</p>
       </div>
     </div>
 
     <div className="flex items-center gap-4 lg:gap-8">
       {/* Role Switcher */}
-      <div className="hidden md:flex bg-slate-100 p-1.5 rounded-xl gap-1">
+      <div className="hidden md:flex bg-white/10 p-1.5 rounded-xl gap-1">
         {(['Admin', 'Operador', 'Técnico'] as Role[]).map((r) => (
           <button
             key={r}
             onClick={() => setRole(r)}
             className={`px-4 py-1.5 rounded-lg text-[11px] font-black tracking-tight transition-all uppercase ${
-              role === r ? 'bg-white text-[#004b93] shadow-md' : 'text-slate-400 hover:text-slate-600'
+              role === r ? 'bg-white text-[#00A4AE] shadow-md' : 'text-white/40 hover:text-white'
             }`}
           >
             {r}
@@ -256,15 +257,15 @@ const Header = ({
         ))}
       </div>
 
-      <div className="flex items-center gap-4 lg:gap-6 pl-4 lg:pl-8 border-l border-slate-200">
-        <button className="relative p-2 text-slate-400 hover:text-[#004b93] transition-colors group">
+      <div className="flex items-center gap-4 lg:gap-6 pl-4 lg:pl-8 border-l border-white/10">
+        <button className="relative p-2 text-white/70 hover:text-white transition-colors group">
           <ShoppingCart className="w-6 h-6 transition-transform group-hover:scale-110" />
           {cartCount > 0 && (
             <motion.span 
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               key={cartCount}
-              className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white shadow-sm"
+              className="absolute -top-1 -right-1 bg-[#DA6000] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-[#00A4AE] shadow-sm"
             >
               {cartCount}
             </motion.span>
@@ -273,10 +274,10 @@ const Header = ({
         
         <div className="flex items-center gap-3">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-bold text-slate-800">Diego Armando</p>
-            <p className="text-[10px] text-[#004b93] uppercase font-black tracking-tighter">Verified {role}</p>
+            <p className="text-sm font-bold text-white">Diego Armando</p>
+            <p className="text-[10px] text-white/60 uppercase font-black tracking-tighter">Verified {role}</p>
           </div>
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#004b93] to-[#00a8e8] flex items-center justify-center overflow-hidden shadow-lg shadow-blue-200">
+          <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center overflow-hidden border border-white/20">
             <UserCircle className="w-7 h-7 text-white" />
           </div>
         </div>
@@ -298,7 +299,7 @@ const SectionHeader = ({ title, subtitle, action }: { title: string, subtitle: s
 export default function App() {
   const [role, setRole] = useState<Role>('Admin');
   const [view, setView] = useState<View>('Dashboard');
-  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [cartCount, setCartCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [toast, setToast] = useState<string | null>(null);
@@ -333,7 +334,7 @@ export default function App() {
               title="Panel Principal" 
               subtitle="Monitoreo de rendimiento y métricas operativas diarias." 
               action={
-                <button className="flex items-center gap-2 bg-[#004b93] hover:bg-[#003566] text-white font-bold px-8 py-4 rounded-2xl transition-all shadow-xl shadow-blue-900/20 active:scale-95 group">
+                <button className="flex items-center gap-2 bg-[#DA6000] hover:bg-[#c55600] text-white font-bold px-8 py-4 rounded-2xl transition-all shadow-xl shadow-orange-900/20 active:scale-95 group">
                   <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" />
                   Nueva Asignación
                 </button>
@@ -343,10 +344,10 @@ export default function App() {
             {/* Metrics */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
-                { label: 'Servicios Activos', value: '8', icon: AlertCircle, color: 'text-blue-600', bg: 'bg-blue-100', trend: '+2 hoy' },
+                { label: 'Servicios Activos', value: '8', icon: AlertCircle, color: 'text-[#00A4AE]', bg: 'bg-[#00A4AE]/10', trend: '+2 hoy' },
                 { label: 'Ingresos del Día', value: '$12,500', icon: CreditCard, color: 'text-green-600', bg: 'bg-green-100', trend: '$ MXN' },
                 { label: 'Alertas de Flota', value: '2', icon: Bell, color: 'text-red-600', bg: 'bg-red-100', trend: 'Críticas' },
-                { label: 'SLA Promedio', value: '18 min', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-100', trend: '-2% vs ayer' },
+                { label: 'SLA Promedio', value: '18 min', icon: Clock, color: 'text-[#DA6000]', bg: 'bg-[#DA6000]/10', trend: '-2% vs ayer' },
               ].map((m, i) => (
                 <motion.div 
                   key={i}
@@ -371,12 +372,12 @@ export default function App() {
                 <div className="flex justify-between items-center mb-8">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center">
-                      <Navigation className="w-5 h-5 text-[#004b93]" />
+                      <Navigation className="w-5 h-5 text-[#00A4AE]" />
                     </div>
                     <h3 className="text-lg font-black text-slate-800">Mapa Satelital de Operaciones</h3>
                   </div>
                   <div className="flex bg-slate-50 p-1 rounded-xl">
-                    <button className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-white shadow-sm text-[#004b93]">TODO</button>
+                    <button className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-white shadow-sm text-[#00A4AE]">TODO</button>
                     <button className="px-3 py-1.5 rounded-lg text-[10px] font-bold text-slate-400">FILTRAR</button>
                   </div>
                 </div>
@@ -384,90 +385,47 @@ export default function App() {
                   <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60" />
                   
-                  {/* Decorative Elements for Map Simulation */}
-                  <div className="absolute inset-0 pointer-events-none opacity-20">
-                     <div className="w-full h-full border border-white/5 grid grid-cols-12 grid-rows-8" />
-                  </div>
-
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
                     <motion.div 
                       animate={{ scale: [1, 1.1, 1] }} 
                       transition={{ duration: 4, repeat: Infinity }}
-                      className="w-48 h-48 bg-blue-500/20 rounded-full blur-[80px]" 
+                      className="w-48 h-48 bg-[#00A4AE]/20 rounded-full blur-[80px]" 
                     />
                     <div className="relative z-10">
-                      <p className="text-blue-400 font-mono text-[10px] uppercase tracking-[0.3em] mb-4">Live Tracking v4.2</p>
+                      <p className="text-[#00A4AE] font-mono text-[10px] uppercase tracking-[0.3em] mb-4">Live Tracking v4.2</p>
                       <h4 className="text-white text-xl font-black mb-2 italic">Ciudad de México & Zona Metrop.</h4>
-                      <div className="flex gap-4 justify-center items-center mt-6">
-                        <div className="flex flex-col items-center">
-                          <span className="text-2xl font-black text-white">42</span>
-                          <span className="text-[10px] text-slate-500 font-bold uppercase">Unidades</span>
-                        </div>
-                        <div className="w-px h-8 bg-slate-800" />
-                        <div className="flex flex-col items-center">
-                          <span className="text-2xl font-black text-blue-400">31</span>
-                          <span className="text-[10px] text-slate-500 font-bold uppercase">En Ruta</span>
-                        </div>
-                      </div>
                     </div>
                   </div>
-
-                  {/* Simulated Dynamic Pins */}
-                  {[
-                    { t: '15%', l: '20%', c: 'bg-green-500' },
-                    { t: '60%', l: '40%', c: 'bg-blue-500' },
-                    { t: '30%', l: '80%', c: 'bg-red-500' },
-                    { t: '75%', l: '70%', c: 'bg-yellow-400' },
-                  ].map((p, i) => (
-                    <motion.div 
-                      key={i}
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 2 + i, repeat: Infinity }}
-                      style={{ top: p.t, left: p.l }}
-                      className={`absolute w-3 h-3 rounded-full border-2 border-white shadow-[0_0_15px_rgba(255,255,255,0.5)] ${p.c}`}
-                    />
-                  ))}
                 </div>
               </div>
 
-              <div className="bg-[#004b93] rounded-[32px] p-8 text-white relative overflow-hidden flex flex-col justify-between group">
+              <div className="bg-[#00A4AE] rounded-[32px] p-8 text-white relative overflow-hidden flex flex-col justify-between group">
                 <div className="relative z-10">
                   <h3 className="text-xl font-black mb-6 flex items-center gap-3">
-                    <TrendingUp className="w-6 h-6 text-blue-300" />
+                    <TrendingUp className="w-6 h-6 text-white/50" />
                     Proyección de Servicios
                   </h3>
                   <div className="space-y-6">
                     <div>
                       <div className="flex justify-between text-xs font-bold mb-2 uppercase tracking-tight">
-                        <span className="text-blue-100">Grúas (Especializadas)</span>
+                        <span className="text-white/70">Grúas (Especializadas)</span>
                         <span className="text-white">88%</span>
                       </div>
-                      <div className="h-2 bg-blue-900/50 rounded-full overflow-hidden">
-                        <motion.div initial={{ width: 0 }} animate={{ width: '88%' }} className="h-full bg-blue-400" />
+                      <div className="h-2 bg-black/20 rounded-full overflow-hidden">
+                        <motion.div initial={{ width: 0 }} animate={{ width: '88%' }} className="h-full bg-[#DA6000]" />
                       </div>
                     </div>
                     <div>
                       <div className="flex justify-between text-xs font-bold mb-2 uppercase tracking-tight">
-                        <span className="text-blue-100">Mecánica menor</span>
+                        <span className="text-white/70">Mecánica menor</span>
                         <span className="text-white">64%</span>
                       </div>
-                      <div className="h-2 bg-blue-900/50 rounded-full overflow-hidden">
+                      <div className="h-2 bg-black/20 rounded-full overflow-hidden">
                         <motion.div initial={{ width: 0 }} animate={{ width: '64%' }} className="h-full bg-white" />
                       </div>
                     </div>
                   </div>
                 </div>
-                
-                <div className="relative z-10 pt-8">
-                  <div className="bg-blue-800/40 border border-blue-700/50 p-4 rounded-2xl">
-                    <p className="text-[11px] font-bold text-blue-200 uppercase mb-1">Dato del Mes</p>
-                    <p className="text-sm font-medium italic leading-relaxed text-blue-50">"La demanda de servicios de grúa aumentó un 12% en zona periférica."</p>
-                  </div>
-                </div>
-
-                {/* Decorative Abstract Logic */}
-                <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-400 opacity-20 blur-3xl rounded-full" />
-                <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-blue-300 opacity-10 blur-[100px] rounded-full group-hover:scale-125 transition-transform duration-1000" />
               </div>
             </div>
           </div>
@@ -488,7 +446,7 @@ export default function App() {
                       placeholder="Placa, Tipo, Ubicación..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-11 pr-6 py-4 bg-white border border-slate-200 rounded-[24px] text-sm w-full md:w-80 focus:ring-4 focus:ring-blue-100 shadow-sm focus:border-[#004b93] transition-all outline-none"
+                      className="pl-11 pr-6 py-4 bg-white border border-slate-200 rounded-[24px] text-sm w-full md:w-80 focus:ring-4 focus:ring-[#00A4AE]/10 shadow-sm focus:border-[#00A4AE] transition-all outline-none"
                     />
                   </div>
                   <button className="p-4 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 transition-colors shadow-sm">
@@ -523,46 +481,12 @@ export default function App() {
                         >
                           <td className="px-8 py-6">
                             <div className="flex flex-col">
-                              <span className="text-sm font-black text-[#004b93] tracking-tight">{srv.id}</span>
+                              <span className="text-sm font-black text-[#00A4AE] tracking-tight">{srv.id}</span>
                               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-1">{srv.plate}</span>
                             </div>
                           </td>
-                          <td className="px-8 py-6">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center">
-                                {srv.type.includes('Grúa') ? <Truck className="w-4 h-4 text-slate-400" /> : <Wrench className="w-4 h-4 text-slate-400" />}
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="text-sm font-bold text-slate-700">{srv.type}</span>
-                                <span className="text-[10px] text-slate-400 font-medium">{srv.vehicle}</span>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-8 py-6">
-                            <div className="flex items-center gap-2">
-                              <MapIcon className="w-3 h-3 text-slate-400" />
-                              <span className="text-sm text-slate-600 font-medium truncate max-w-[200px]">{srv.location}</span>
-                            </div>
-                          </td>
-                          <td className="px-8 py-6 text-center">
-                            <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight ${
-                              srv.status === 'En camino' ? 'bg-blue-100 text-blue-700' :
-                              srv.status === 'En sitio' ? 'bg-amber-100 text-amber-700' :
-                              srv.status === 'Finalizado' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'
-                            }`}>
-                              {srv.status}
-                            </span>
-                          </td>
-                          <td className="px-8 py-6 text-center">
-                            <div className="flex flex-col items-center">
-                              <span className="text-sm font-black text-slate-800">{srv.time}</span>
-                              <span className={`text-[9px] font-bold uppercase tracking-widest ${
-                                srv.priority === 'Alta' ? 'text-red-500' : 'text-slate-400'
-                              }`}>{srv.priority}</span>
-                            </div>
-                          </td>
                           <td className="px-8 py-6 text-right">
-                            <button className="p-3 bg-white border border-slate-100 rounded-2xl hover:border-[#004b93] hover:text-[#004b93] transition-all shadow-sm">
+                            <button className="p-3 bg-white border border-slate-100 rounded-2xl hover:border-[#DA6000] hover:text-[#DA6000] transition-all shadow-sm">
                               <ChevronRight className="w-5 h-5" />
                             </button>
                           </td>
@@ -590,32 +514,7 @@ export default function App() {
                       whileHover={{ scale: 1.02 }}
                       className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm relative overflow-hidden"
                     >
-                      <div className="flex justify-between items-start mb-6">
-                        <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center">
-                          <Truck className="w-6 h-6 text-blue-400" />
-                        </div>
-                        <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full ${
-                          unit.status === 'Disponible' ? 'bg-green-100 text-green-700' :
-                          unit.status === 'Ocupado' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'
-                        }`}>
-                          {unit.status}
-                        </span>
-                      </div>
-                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Unidad {unit.id}</h4>
-                      <p className="text-lg font-black text-slate-900 mb-4">{unit.operator}</p>
-                      
-                      <div className="space-y-3 pt-4 border-t border-slate-50">
-                        <div className="flex items-center gap-2 text-slate-500">
-                          <MapIcon className="w-4 h-4" />
-                          <span className="text-xs font-medium">{unit.lastLocation}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-slate-500">
-                          <Phone className="w-4 h-4" />
-                          <span className="text-xs font-medium">+52 55 #### ####</span>
-                        </div>
-                      </div>
-
-                      <button className="w-full mt-6 py-3 bg-slate-50 hover:bg-[#004b93] hover:text-white rounded-2xl text-xs font-black transition-all uppercase tracking-tighter">
+                      <button className="w-full mt-6 py-3 bg-[#DA6000] text-white hover:bg-[#c55600] rounded-2xl text-xs font-black transition-all uppercase tracking-tighter">
                         Ver Historial
                       </button>
                     </motion.div>
@@ -634,36 +533,19 @@ export default function App() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {PRODUCTS.map((p) => (
-                <motion.div 
-                  key={p.id}
-                  whileHover={{ y: -10 }}
-                  className="bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-sm flex flex-col group"
-                >
-                  <div className="h-64 overflow-hidden relative">
-                    <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                      <button className="p-3 bg-white rounded-full hover:bg-[#004b93] hover:text-white transition-all shadow-xl">
-                        <Eye className="w-5 h-5" />
-                      </button>
-                    </div>
-                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-4 py-1.5 rounded-full shadow-sm">
-                      <p className="text-sm font-black text-[#004b93]">${p.price.toLocaleString()} <span className="text-[10px] text-slate-400">MXN</span></p>
-                    </div>
+                <div key={p.id} className="bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-sm flex flex-col group p-8">
+                  <div className="h-48 overflow-hidden rounded-2xl mb-6">
+                    <img src={p.image} className="w-full h-full object-cover" />
                   </div>
-                  <div className="p-8 flex flex-col flex-1">
-                    <h4 className="text-lg font-black text-slate-900 leading-tight mb-2">{p.name}</h4>
-                    <p className="text-slate-500 text-sm font-medium line-clamp-2 mb-6 italic">{p.description}</p>
-                    <div className="mt-auto">
-                        <button 
-                          onClick={() => addToCart(p.name)}
-                          className="w-full bg-[#004b93] hover:bg-[#003566] text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-95 shadow-lg shadow-[#004b93]/20"
-                        >
-                          <Plus className="w-5 h-5" />
-                          Añadir al Carrito
-                        </button>
-                    </div>
-                  </div>
-                </motion.div>
+                  <h4 className="font-black text-slate-900 mb-2">{p.name}</h4>
+                  <button 
+                    onClick={() => addToCart(p.name)}
+                    className="w-full bg-[#DA6000] hover:bg-[#c55600] text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-all mt-auto"
+                  >
+                    <Plus className="w-5 h-5" />
+                    Añadir al Carrito
+                  </button>
+                </div>
               ))}
             </div>
           </div>
@@ -675,7 +557,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen bg-[#f8fafc] font-sans selection:bg-blue-100 selection:text-[#004b93] overflow-hidden">
+    <div className="flex h-screen bg-[#f8fafc] font-sans selection:bg-blue-100 selection:text-[#00A4AE] overflow-hidden">
       <Sidebar 
         currentRole={role} 
         currentView={view}
@@ -697,29 +579,22 @@ export default function App() {
           <div className="max-w-7xl mx-auto w-full pb-20">
             {renderContent()}
           </div>
-
-          {/* Toast Notification */}
+          
           <AnimatePresence>
             {toast && (
               <motion.div 
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
-                className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-slate-900 text-white px-8 py-4 rounded-3xl shadow-2xl border border-white/10 flex items-center gap-4 min-w-[300px]"
+                className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-[#00A4AE] text-white px-8 py-4 rounded-3xl shadow-2xl flex items-center gap-4"
               >
-                <div className="p-1 bg-green-500 rounded-full">
-                  <CheckCircle2 className="w-5 h-5 text-white" />
-                </div>
                 <p className="text-sm font-bold tracking-tight">{toast}</p>
               </motion.div>
             )}
           </AnimatePresence>
-
-          {/* Background Decorative Blobs */}
-          <div className="fixed top-20 right-0 w-[600px] h-[600px] bg-blue-100/30 rounded-full blur-[120px] pointer-events-none -z-10" />
-          <div className="fixed bottom-0 left-0 w-[400px] h-[400px] bg-sky-100/20 rounded-full blur-[100px] pointer-events-none -z-10" />
         </main>
       </div>
     </div>
   );
 }
+
